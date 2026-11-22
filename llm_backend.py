@@ -2,7 +2,12 @@ import os
 import streamlit as st
 
 LOCAL_MODEL = "qwen3:1.7b"
-CLOUD_MODEL = "llama-3.1-8b-instant"
+PREFERRED_CLOUD_MODELS = [
+    "llama-3.3-70b-versatile",
+    "qwen/qwen3-32b",
+    "llama-3.1-8b-instant",
+    "gemma2-9b-it",
+]
 CONTEXT_LENGTH = 2048
 
 SYSTEM_PROMPT = (
@@ -32,11 +37,33 @@ def is_local_ollama_available() -> bool:
         return False
 
 
+@st.cache_data(ttl=3600)
+def get_available_cloud_model(api_key: str) -> str:
+    """Automatically picks an active chat model from Groq so it never hits NotFoundError."""
+    try:
+        from groq import Groq
+        client = Groq(api_key=api_key)
+        models = [
+            m.id for m in client.models.list().data
+            if "whisper" not in m.id.lower() and "guard" not in m.id.lower()
+        ]
+        for preferred in PREFERRED_CLOUD_MODELS:
+            if preferred in models:
+                return preferred
+        if models:
+            return models[0]
+    except Exception:
+        pass
+    return PREFERRED_CLOUD_MODELS[0]
+
+
 def get_active_engine_info() -> tuple[str, str]:
     """Returns (model_name, runtime_label) based on environment."""
     if is_local_ollama_available():
         return LOCAL_MODEL, "Ollama (100% Local)"
-    return CLOUD_MODEL, "Groq Cloud API (Live Demo)"
+    api_key = _get_groq_api_key()
+    cloud_model = get_available_cloud_model(api_key) if api_key else PREFERRED_CLOUD_MODELS[0]
+    return cloud_model, "Groq Cloud API (Live Demo)"
 
 
 def get_assistant_reply(chat_history: list) -> str:
@@ -67,8 +94,9 @@ def get_assistant_reply(chat_history: list) -> str:
 
     from groq import Groq
     client = Groq(api_key=api_key)
+    active_cloud_model = get_available_cloud_model(api_key)
     completion = client.chat.completions.create(
-        model=CLOUD_MODEL,
+        model=active_cloud_model,
         messages=messages,
         max_tokens=1024,
         temperature=0.6
