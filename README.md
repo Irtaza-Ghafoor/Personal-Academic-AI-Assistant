@@ -7,7 +7,7 @@
 
 A **hardware-aware, dual-mode Personal Academic AI Assistant** built with a modular Python backend and a custom glassmorphic Streamlit UI. It runs **100% locally offline via Ollama** on consumer CPU hardware and automatically switches to **Groq Cloud API** when deployed live on Streamlit Community Cloud.
 
-🔗 **Live Demo:** [Add Your Streamlit Cloud URL Here]
+🔗 **Live Demo:** personal-academic-ai-assistant-3jsvjhpmhnug3u9sjcaezw.streamlit.app
 
 ---
 
@@ -55,8 +55,8 @@ Before selecting `qwen3:1.7b` as the primary local model, empirical benchmarks w
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Irtaza-Ghafoor/hybrid-academic-ai-assistant.git
-cd hybrid-academic-ai-assistant
+git clone https://github.com/Irtaza-Ghafoor/personal-academic-ai-assistant.git
+cd personal-academic-ai-assistant
 ```
 
 ### 2. Install Dependencies
